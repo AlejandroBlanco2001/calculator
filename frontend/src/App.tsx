@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { appendCloseParen, appendOpenParen, appendOperator } from './validators'
 import './App.css'
 
+const API_BASE = import.meta.env.VITE_API_URL ?? ''
 const OPERATORS = new Set(['+', '-', '*', '/', '^', '%'])
 const ALLOWED_KEYS = new Set([...Array.from('0123456789.+-*/^%()'), 'Enter', 'Backspace'])
 
@@ -33,7 +34,7 @@ export default function App() {
     const expr = expressionRef.current
     if (!expr) return
     try {
-      const res = await fetch('/calculate', {
+      const res = await fetch(`${API_BASE}/calculate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ expression: expr }),
