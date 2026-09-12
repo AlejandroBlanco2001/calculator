@@ -99,4 +99,6 @@ make test      # run tests
 make coverage  # run tests + generate coverage.html
 ```
 
-The HTML report is written to `coverage.html`. Note: tests live in the separate `tests/` package, so the Go toolchain reports `0%` for `calculadora/backend` itself — the functions are exercised but the coverage attribution only appears for `calculadora/backend/cmd` (HTTP handler at **89.5%**). `main()` is excluded by nature of being an `os.Exit` path.
+The HTML report is written to `coverage.html`.
+
+Tests live in the `tests/` sub-package (a common Go pattern that enforces black-box testing by preventing access to unexported identifiers). Because of this, `go tool cover` attributes coverage to `calculadora/backend/cmd` rather than `calculadora/backend` — the core functions in `operations.go` and `evaluator.go` are fully exercised, but the toolchain reports it against the package that imports them. The HTTP handler in `cmd` shows **89.5%** coverage; `main()` itself is excluded as it is an OS-exit path.
