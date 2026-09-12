@@ -6,7 +6,7 @@ We are going to follow the standard Go pattern for testing "TableTesting", this 
 # Test cases
 
 ## Endpoints 
-This will cover the test cases for the `main.go` file that will include the logic of the endpoints (not the RPN, shutting yard or operations)
+This will cover the test cases for the `main.go` file that will include the logic of the endpoints (not the RPN, Shunting-Yard or operations)
 
 ### Calculate (main.go)
 0. If the user sends a valid infix expression inside the JSON inside the "expression" field, should get a 200 with the result of the operation
@@ -23,7 +23,7 @@ For the operations, we just need to worry about the invalid cases for the:
 ## Parsing algorithms (evaluator.go)
 
 - For the infix to RPN, we just need to validate that given a valid expression in the infix, we return the equivalent in RPN
-- For the shutting-yard, we just need to validate the end-result given a valid and invalid RPN
+- For the Shunting-Yard evaluator, we just need to validate the end-result given a valid and invalid RPN
 
 The reason why this is that both algorithms are well-known so just avoid adding more tests that need it, we just need to good outcome and the most general bad outcomes 
 

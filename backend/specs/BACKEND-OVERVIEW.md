@@ -18,6 +18,6 @@ for better responses.
 ## Endpoint
 1. ``/calculate``: This is a POST endpoint, this will get inside the body a field called 'expression', and the idea is to:
   - Make the infix to RPN
-  - Evaluate the stack with the shutting yard algorithm
+  - Evaluate the stack with the Shunting-Yard algorithm
   - return the result of the evaluation inside a JSON with the field "result" with a 200 result
   - Any other thing should be a 400 error, with the reason why: "Division by Zero", "Negative square root"

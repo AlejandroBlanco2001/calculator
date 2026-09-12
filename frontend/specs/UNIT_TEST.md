@@ -12,5 +12,5 @@ All the calculator code UI will live in the App.tsx, and we need to test the fol
 3. When the user press multiples times a symbol, should just have one. For example `****` should be just one `*`.
 4. When the user presses switches between symbols, should always contain the last one pressed. For example `*/` should be just `/`
 
-All the logic validation can be unit tested without actualing mocking input validations because those will be living inside a validators file.
+All the logic validation can be unit tested without actually mocking input validations because those will be living inside a validators file.
 

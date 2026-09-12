@@ -102,3 +102,37 @@ body {
   border-radius: 48px;
   font-size: 36px;
 }
+
+@media (max-width: 420px) {
+  .calculator {
+    border-radius: 0;
+  }
+
+  .display-area {
+    min-height: 120px;
+    padding: 20px 20px 12px;
+  }
+
+  .display {
+    font-size: 48px;
+  }
+
+  .display--error {
+    font-size: 20px;
+  }
+
+  .buttons {
+    gap: 8px;
+    padding: 12px 16px 20px;
+  }
+
+  .btn {
+    height: 68px;
+    font-size: 24px;
+    border-radius: 14px;
+  }
+
+  .span-3 {
+    font-size: 26px;
+  }
+}

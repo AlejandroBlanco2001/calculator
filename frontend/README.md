@@ -47,4 +47,4 @@ npm run coverage  # run tests + generate coverage report
 
 Unit tests cover the validator helpers and the main App component (fetch mocked). The HTML coverage report is written to `coverage/index.html`.
 
-Latest results: **76% statements · 73% branches · 61% functions · 80% lines**
+Run `npm run coverage` for current numbers.

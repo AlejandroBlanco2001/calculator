@@ -26,7 +26,7 @@ We are going to make a web application for a non-scientific calculator.
 - We should have a `AC` button
 
 ## Validations
-All the validations are going to be inside the component but just called, the logig itself should live in a different service, so is unit test easy
+All the validations are going to be inside the component but just called, the logic itself should live in a different service, for easy unit testing
 
 ## Backend communication
 - We are going to have just one endpoint that is `/calculate` with a POST That should include a JSON with the field `expression` with the math expression
