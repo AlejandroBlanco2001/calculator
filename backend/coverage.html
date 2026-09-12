@@ -1,0 +1,378 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>cmd: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">calculadora/backend/cmd/main.go (89.5%)</option>
+				
+				<option value="file1">calculadora/backend/evaluator.go (0.0%)</option>
+				
+				<option value="file2">calculadora/backend/operations.go (0.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package main
+
+import (
+        "encoding/json"
+        "log"
+        "net/http"
+
+        backend "calculadora/backend"
+
+        "github.com/go-chi/chi/v5"
+)
+
+func newRouter() *chi.Mux <span class="cov8" title="1">{
+        r := chi.NewRouter()
+        r.Post("/calculate", handleCalculate)
+        return r
+}</span>
+
+func handleCalculate(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        var body struct {
+                Expression string `json:"expression"`
+        }
+
+        if err := json.NewDecoder(r.Body).Decode(&amp;body); err != nil || body.Expression == "" </span><span class="cov8" title="1">{
+                http.Error(w, "missing or invalid 'expression' field", http.StatusBadRequest)
+                return
+        }</span>
+
+        <span class="cov8" title="1">tokens, err := backend.InfixToRPN(body.Expression)
+        if err != nil </span><span class="cov8" title="1">{
+                http.Error(w, err.Error(), http.StatusBadRequest)
+                return
+        }</span>
+
+        <span class="cov8" title="1">result, err := backend.EvaluateRPN(tokens)
+        if err != nil </span><span class="cov8" title="1">{
+                http.Error(w, err.Error(), http.StatusBadRequest)
+                return
+        }</span>
+
+        <span class="cov8" title="1">w.Header().Set("Content-Type", "application/json")
+        json.NewEncoder(w).Encode(map[string]float32{"result": result})</span>
+}
+
+func main() <span class="cov0" title="0">{
+        log.Println("listening on :8080")
+        log.Fatal(http.ListenAndServe(":8080", newRouter()))
+}</span>
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package backend
+
+import (
+        "errors"
+        "fmt"
+        "strconv"
+        "strings"
+        "unicode"
+)
+ 
+// For more operations, you can add them to the precedence map below, followed by their precedence level.
+// Higher numbers indicate higher precedence.
+var precedence = map[string]int{
+        "+": 1, "-": 1,
+        "*": 2, "/": 2, "%": 2,
+        "^": 3,
+        "√": 4,
+}
+
+func isOperator(tok string) bool <span class="cov0" title="0">{
+        _, ok := precedence[tok]
+        return ok
+}</span>
+
+func isUnary(tok string) bool <span class="cov0" title="0">{
+        return tok == "√" || tok == "%"
+}</span>
+
+func isRightAssociative(tok string) bool <span class="cov0" title="0">{
+        return tok == "^"
+}</span>
+
+// InfixToRPN converts an infix expression string to a slice of RPN tokens
+// using the Shunting Yard algorithm.
+func InfixToRPN(expr string) ([]string, error) <span class="cov0" title="0">{
+        var output []string
+        var opStack []string
+
+        i := 0
+        runes := []rune(expr)
+
+        for i &lt; len(runes) </span><span class="cov0" title="0">{
+                ch := runes[i]
+
+                if unicode.IsSpace(ch) </span><span class="cov0" title="0">{
+                        i++
+                        continue</span>
+                }
+
+                // Number (including decimals)
+                <span class="cov0" title="0">if unicode.IsDigit(ch) || ch == '.' </span><span class="cov0" title="0">{
+                        j := i
+                        for j &lt; len(runes) &amp;&amp; (unicode.IsDigit(runes[j]) || runes[j] == '.') </span><span class="cov0" title="0">{
+                                j++
+                        }</span>
+                        <span class="cov0" title="0">output = append(output, string(runes[i:j]))
+                        i = j
+                        continue</span>
+                }
+
+                // Operators and parentheses
+                <span class="cov0" title="0">tok := string(ch)
+
+                if tok == "(" </span><span class="cov0" title="0">{
+                        opStack = append(opStack, tok)
+                        i++
+                        continue</span>
+                }
+
+                <span class="cov0" title="0">if tok == ")" </span><span class="cov0" title="0">{
+                        for len(opStack) &gt; 0 &amp;&amp; opStack[len(opStack)-1] != "(" </span><span class="cov0" title="0">{
+                                output = append(output, opStack[len(opStack)-1])
+                                opStack = opStack[:len(opStack)-1]
+                        }</span>
+                        <span class="cov0" title="0">if len(opStack) == 0 </span><span class="cov0" title="0">{
+                                return nil, errors.New("mismatched parentheses")
+                        }</span>
+                        <span class="cov0" title="0">opStack = opStack[:len(opStack)-1] // pop "("
+                        i++
+                        continue</span>
+                }
+
+                <span class="cov0" title="0">if isOperator(tok) </span><span class="cov0" title="0">{
+                        for len(opStack) &gt; 0 </span><span class="cov0" title="0">{
+                                top := opStack[len(opStack)-1]
+                                if top == "(" </span><span class="cov0" title="0">{
+                                        break</span>
+                                }
+                                <span class="cov0" title="0">if !isOperator(top) </span><span class="cov0" title="0">{
+                                        break</span>
+                                }
+                                <span class="cov0" title="0">topPrec := precedence[top]
+                                tokPrec := precedence[tok]
+                                if topPrec &gt; tokPrec || (topPrec == tokPrec &amp;&amp; !isRightAssociative(tok)) </span><span class="cov0" title="0">{
+                                        output = append(output, top)
+                                        opStack = opStack[:len(opStack)-1]
+                                }</span> else<span class="cov0" title="0"> {
+                                        break</span>
+                                }
+                        }
+                        <span class="cov0" title="0">opStack = append(opStack, tok)
+                        i++
+                        continue</span>
+                }
+
+                <span class="cov0" title="0">return nil, fmt.Errorf("unknown character: %q", tok)</span>
+        }
+
+        <span class="cov0" title="0">for len(opStack) &gt; 0 </span><span class="cov0" title="0">{
+                top := opStack[len(opStack)-1]
+                if top == "(" || top == ")" </span><span class="cov0" title="0">{
+                        return nil, errors.New("mismatched parentheses")
+                }</span>
+                <span class="cov0" title="0">output = append(output, top)
+                opStack = opStack[:len(opStack)-1]</span>
+        }
+
+        <span class="cov0" title="0">return output, nil</span>
+}
+
+// EvaluateRPN evaluates a slice of RPN tokens and returns the result.
+func EvaluateRPN(tokens []string) (float32, error) <span class="cov0" title="0">{
+        var stack []float32
+
+        pop := func() (float32, error) </span><span class="cov0" title="0">{
+                if len(stack) == 0 </span><span class="cov0" title="0">{
+                        return 0, errors.New("invalid expression")
+                }</span>
+                <span class="cov0" title="0">val := stack[len(stack)-1]
+                stack = stack[:len(stack)-1]
+                return val, nil</span>
+        }
+
+        <span class="cov0" title="0">for _, tok := range tokens </span><span class="cov0" title="0">{
+                if isOperator(tok) </span><span class="cov0" title="0">{
+                        if isUnary(tok) </span><span class="cov0" title="0">{
+                                a, err := pop()
+                                if err != nil </span><span class="cov0" title="0">{
+                                        return 0, err
+                                }</span>
+                                <span class="cov0" title="0">switch tok </span>{
+                                case "√":<span class="cov0" title="0">
+                                        result, err := Sqrt(a)
+                                        if err != nil </span><span class="cov0" title="0">{
+                                                return 0, err
+                                        }</span>
+                                        <span class="cov0" title="0">stack = append(stack, result)</span>
+                                case "%":<span class="cov0" title="0">
+                                        stack = append(stack, Percent(a))</span>
+                                }
+                        } else<span class="cov0" title="0"> {
+                                b, err := pop()
+                                if err != nil </span><span class="cov0" title="0">{
+                                        return 0, err
+                                }</span>
+                                <span class="cov0" title="0">a, err := pop()
+                                if err != nil </span><span class="cov0" title="0">{
+                                        return 0, err
+                                }</span>
+                                <span class="cov0" title="0">switch tok </span>{
+                                case "+":<span class="cov0" title="0">
+                                        stack = append(stack, Add(a, b))</span>
+                                case "-":<span class="cov0" title="0">
+                                        stack = append(stack, Subtract(a, b))</span>
+                                case "*":<span class="cov0" title="0">
+                                        stack = append(stack, Multiply(a, b))</span>
+                                case "/":<span class="cov0" title="0">
+                                        result, err := Divide(a, b)
+                                        if err != nil </span><span class="cov0" title="0">{
+                                                return 0, err
+                                        }</span>
+                                        <span class="cov0" title="0">stack = append(stack, result)</span>
+                                case "^":<span class="cov0" title="0">
+                                        stack = append(stack, Pow(a, b))</span>
+                                }
+                        }
+                } else<span class="cov0" title="0"> {
+                        tok = strings.TrimSpace(tok)
+                        val, err := strconv.ParseFloat(tok, 32)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return 0, fmt.Errorf("invalid token: %q", tok)
+                        }</span>
+                        <span class="cov0" title="0">stack = append(stack, float32(val))</span>
+                }
+        }
+
+        <span class="cov0" title="0">if len(stack) != 1 </span><span class="cov0" title="0">{
+                return 0, errors.New("invalid expression")
+        }</span>
+        <span class="cov0" title="0">return stack[0], nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package backend
+
+import (
+        "errors"
+        "math"
+)
+
+func Add(a, b float32) float32      <span class="cov0" title="0">{ return a + b }</span>
+func Subtract(a, b float32) float32 <span class="cov0" title="0">{ return a - b }</span>
+func Multiply(a, b float32) float32 <span class="cov0" title="0">{ return a * b }</span>
+
+func Divide(a, b float32) (float32, error) <span class="cov0" title="0">{
+        if b == 0 </span><span class="cov0" title="0">{
+                return 0, errors.New("Division by Zero")
+        }</span>
+        <span class="cov0" title="0">return a / b, nil</span>
+}
+
+func Sqrt(a float32) (float32, error) <span class="cov0" title="0">{
+        if a &lt; 0 </span><span class="cov0" title="0">{
+                return 0, errors.New("Negative square root")
+        }</span>
+        <span class="cov0" title="0">return float32(math.Sqrt(float64(a))), nil</span>
+}
+
+func Pow(a, b float32) float32 <span class="cov0" title="0">{ return float32(math.Pow(float64(a), float64(b))) }</span>
+
+func Percent(a float32) float32 <span class="cov0" title="0">{ return a / 100 }</span>
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>

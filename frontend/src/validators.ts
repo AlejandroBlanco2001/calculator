@@ -1,28 +1,36 @@
 const OPERATORS = new Set(['+', '-', '*', '/', '^', '%'])
 
-export function appendOpenParen(expr: string): string {
-  return expr + '()'
+export function appendOpenParen(expr: string, cursor: number): [string, number] {
+  const left = expr.slice(0, cursor)
+  const right = expr.slice(cursor)
+  return [left + '()' + right, cursor + 1]
 }
 
-export function appendCloseParen(expr: string): string {
+export function appendCloseParen(expr: string, cursor: number): [string, number] {
   const unmatched = [...expr].reduce((count, ch) => {
     if (ch === '(') return count + 1
     if (ch === ')') return count - 1
     return count
   }, 0)
 
-  return unmatched > 0 ? expr + ')' : expr
+  if (unmatched <= 0) return [expr, cursor]
+
+  const left = expr.slice(0, cursor)
+  const right = expr.slice(cursor)
+  return [left + ')' + right, cursor + 1]
 }
 
-export function appendOperator(expr: string, op: string): string {
-  const lastChar = expr[expr.length - 1]
+export function appendOperator(expr: string, op: string, cursor: number): [string, number] {
+  const left = expr.slice(0, cursor)
+  const right = expr.slice(cursor)
+  const lastChar = left[left.length - 1]
 
   if (OPERATORS.has(lastChar)) {
     if (op === '-' && lastChar !== '-') {
-      return expr + op
+      return [left + op + right, cursor + 1]
     }
-    return expr.slice(0, -1) + op
+    return [left.slice(0, -1) + op + right, cursor]
   }
 
-  return expr + op
+  return [left + op + right, cursor + 1]
 }
