@@ -23,10 +23,11 @@ When `VITE_API_URL` is empty the fetch goes to `/calculate`, which nginx proxies
 ## Scripts
 
 ```sh
-npm run dev      # start dev server with HMR
-npm run build    # type-check + production build
-npm run test     # run unit tests with vitest
-npm run lint     # oxlint
+npm run dev       # start dev server with HMR
+npm run build     # type-check + production build
+npm run test      # run unit tests with vitest
+npm run coverage  # run tests and generate coverage report
+npm run lint      # oxlint
 ```
 
 ## Design decisions
@@ -37,10 +38,13 @@ npm run lint     # oxlint
 - **`VITE_API_URL` build arg** — injected at build time so the static bundle can target any backend host without a runtime config file.
 - **nginx** serves the production build; no Node process at runtime.
 
-## Tests
+## Tests & coverage
 
 ```sh
-npm run test
+npm run test      # run tests once
+npm run coverage  # run tests + generate coverage report
 ```
 
-Unit tests cover the validator helpers and the main App component (fetch mocked).
+Unit tests cover the validator helpers and the main App component (fetch mocked). The HTML coverage report is written to `coverage/index.html`.
+
+Latest results: **76% statements · 73% branches · 61% functions · 80% lines**

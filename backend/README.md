@@ -84,8 +84,19 @@ curl -X POST http://localhost:8080/calculate \
 - **float32** — adequate for a UI calculator; errors from division by zero and negative square roots are caught explicitly before the math call.
 - **Extending operators** — add an entry to the `precedence` map in `evaluator.go`, implement the function in `operations.go`, and add a `case` in the `EvaluateRPN` switch.
 
-## Tests
+## Tests & coverage
 
 ```sh
-go test ./...
+go test ./...                                              # run tests
+go test -coverprofile=coverage.out ./... \
+  && go tool cover -html=coverage.out -o coverage.html   # coverage report
 ```
+
+Or via the Makefile (if `make` is available):
+
+```sh
+make test      # run tests
+make coverage  # run tests + generate coverage.html
+```
+
+The HTML report is written to `coverage.html`. Note: tests live in the separate `tests/` package, so the Go toolchain reports `0%` for `calculadora/backend` itself — the functions are exercised but the coverage attribution only appears for `calculadora/backend/cmd` (HTTP handler at **89.5%**). `main()` is excluded by nature of being an `os.Exit` path.
